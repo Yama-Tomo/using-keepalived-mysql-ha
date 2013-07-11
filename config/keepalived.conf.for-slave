@@ -1,0 +1,52 @@
+global_defs {
+  notification_email {
+    [notice@exmaple.hogehoge.com]
+  }
+  notification_email_from [notice-from@exmaple.hogehoge.com]
+  smtp_server localhost
+  smtp_connect_timeout 30
+}
+
+! ############## master VIP instance ##############
+vrrp_instance VI_eth0_master {
+  state BACKUP
+  interface eth0
+  lvs_sync_daemon_interface eth0
+  garp_master_delay 1
+
+  smtp_alert
+  virtual_router_id 10
+  priority 100
+  advert_int 1
+  nopreempt
+  notify_master "/etc/keepalived/slave_to_master.sh [root] [password]"
+  authentication {
+    auth_type PASS
+    auth_pass yamatomo
+  }
+  virtual_ipaddress {
+     192.168.162.100 dev eth0
+  }
+}
+
+! ############## slave VIP instance ##############
+vrrp_instance VI_eth0_slave {
+  state MASTER
+  interface eth0
+  lvs_sync_daemon_interface eth0
+  garp_master_delay 1
+
+  !smtp_alert
+  virtual_router_id 20
+  priority 50
+  advert_int 1
+  nopreempt
+  authentication {
+    auth_type PASS
+    auth_pass yamatomo
+  }
+  virtual_ipaddress {
+     192.168.162.200 dev eth0
+  }
+}
+
